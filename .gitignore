@@ -1,0 +1,5 @@
+coco_dataset/
+runs/
+*.png
+*.jpg
+__pycache__
