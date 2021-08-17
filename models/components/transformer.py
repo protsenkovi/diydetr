@@ -5,6 +5,8 @@ from torch import Tensor
 from utils.functions import get_clones, batch_positional_encoding
 from utils.layers import Sequential
 
+from utils import config
+
 class EncoderLayer(nn.Module):
   def __init__(
       self,
@@ -41,7 +43,8 @@ class EncoderLayer(nn.Module):
     self.drop1 = nn.Dropout(dropout)
     self.drop2 = nn.Dropout(dropout)
 
-  def forward(self, x, positional_encoding, key_padding_mask):
+  def forward(self, x, positional_encoding, key_padding_mask, idx):
+    
     residual, avg_head_attention_matrix = self.attention(
         query = x + positional_encoding, 
         key = x + positional_encoding, 
@@ -50,9 +53,26 @@ class EncoderLayer(nn.Module):
     )
     x = self.norm1(x + self.drop1(residual))
 
+    # print(idx, id(self.norm1))
+    # print(avg_head_attention_matrix.shape)
+    # print(avg_head_attention_matrix)
+    # config.tb.add_images(self._get_name() + str(idx) + "inputs", 
+    #   x.unsqueeze(1), config.epoch)
+
+    # config.tb.add_scalar(self._get_name() + str(idx) + "residual_nan", residual.isnan().sum(), config.epoch)
+    # config.tb.add_scalar(self._get_name() + str(idx) + "residual_inf", residual.isinf().sum(), config.epoch)
+    # config.tb.add_scalar(self._get_name() + str(idx) + "x_nan", x.isnan().sum(), config.epoch)
+    # config.tb.add_scalar(self._get_name() + str(idx) + "x_inf", x.isinf().sum(), config.epoch)
+
     residual = self.feedforward(x)
     x = self.norm2(x + self.drop2(residual))
 
+    # config.tb.add_scalar(self._get_name() + str(idx) + "residual_nan", residual.isnan().sum(), config.epoch)
+    # config.tb.add_scalar(self._get_name() + str(idx) + "residual_inf", residual.isinf().sum(), config.epoch)
+    # config.tb.add_scalar(self._get_name() + str(idx) + "x_nan", x.isnan().sum(), config.epoch)
+    # config.tb.add_scalar(self._get_name() + str(idx) + "x_inf", x.isinf().sum(), config.epoch)
+
+    
     return x
 
 class DecoderLayer(nn.Module):
@@ -101,7 +121,7 @@ class DecoderLayer(nn.Module):
     self.drop2 = nn.Dropout(dropout)
     self.drop3 = nn.Dropout(dropout)
  
-  def forward(self, x, memory, query_positional_encoding, key_positional_encoding, key_padding_mask):
+  def forward(self, x, memory, query_positional_encoding, key_positional_encoding, key_padding_mask, idx):
     residual, avg_head_attention_matrix = self.self_attention(
       query = x + query_positional_encoding,
       key = x + query_positional_encoding,
@@ -124,8 +144,10 @@ class DecoderLayer(nn.Module):
 
 class Sequential(nn.Sequential):
   def forward(self, input, **kwargs):
-    for module in self:
-      input = module(input, **kwargs)
+    for idx, module in enumerate(self):
+      input = module(input, idx=idx, **kwargs)
+      # config.tb.add_scalar(module._get_name() + str(idx) + "_nan", input.isnan().sum(), config.epoch)
+      # config.tb.add_scalar(module._get_name() + str(idx) + "_inf", input.isinf().sum(), config.epoch)
     return input
 
 class Transformer(nn.Module):
@@ -165,7 +187,6 @@ class Transformer(nn.Module):
     self.decoder = Sequential(*get_clones(decoder_layer, num_decoder_layers))
 
     self._reset_parameters()
-
 
   def _reset_parameters(self):
     for p in self.parameters():

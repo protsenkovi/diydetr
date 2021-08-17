@@ -22,7 +22,7 @@ class CocoDetection(torchvision.datasets.CocoDetection):
       img, target = self._transforms(img, target)
     return img, target
 
-def make_coco_transforms(image_set):
+def train_coco_transforms():
   """ image set \in {"train", "val"}. Where is test? """
   normalize = Compose([
     ToTensor(),
@@ -31,27 +31,29 @@ def make_coco_transforms(image_set):
 
   size_choices = [480, 512, 544, 576, 608, 640, 672, 704, 736, 768, 800]
 
-  if image_set == 'train':
-    return Compose([
-      RandomHorizontalFlip(),
-      RandomSelect(
-        RandomResize(size_choices, max_size=1333),
-        Compose([
-          RandomResize(size_choices=[400, 500, 600]),
-          RandomSizeCrop(384, 600),
-          RandomResize(size_choices=size_choices, max_size=1333)
-        ])
-      ),
-      # ToTensor()
-      # normalize
-    ])
+  return Compose([
+    RandomHorizontalFlip(),
+    RandomSelect(
+      RandomResize(size_choices, max_size=1333),
+      Compose([
+        RandomResize(size_choices=[400, 500, 600]),
+        RandomSizeCrop(384, 600),
+        RandomResize(size_choices=size_choices, max_size=1333)
+      ])
+    ),
+    normalize,
+  ])
 
-  if image_set == 'val':
-    return Compose([
-      RandomResize(size_choices=[800], max_size=1333),
-      # ToTensor()
-      # normalize
-    ])
+def val_coco_transforms(image_set):
+  normalize = Compose([
+    ToTensor(),
+    Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
+  ])
 
-  raise ValueError(f'unknown {image_set}')
+  size_choices = [480, 512, 544, 576, 608, 640, 672, 704, 736, 768, 800]
+
+  return Compose([
+    RandomResize(size_choices=[800], max_size=1333),
+    normalize
+  ])
 

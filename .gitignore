@@ -3,3 +3,5 @@ runs/
 *.png
 *.jpg
 __pycache__
+.torch/
+.vscode/

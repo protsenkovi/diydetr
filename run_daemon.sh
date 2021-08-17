@@ -1,8 +1,9 @@
-docker stop avaz_shmixer
-docker rm avaz_shmixer
+docker stop diydetr
+docker rm diydetr
 docker run -d \
-    --name avaz_shmixer \
+    --name diydetr \
     --gpus all \
     -v $(pwd):/workdir \
-    avaz_shmixer \
+    --shm-size 1g \
+    diydetr \
     bash -l -c "cd /workdir; python main.py"

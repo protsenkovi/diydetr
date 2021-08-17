@@ -10,6 +10,13 @@ def box_xyxy_to_cxcywh(x):
   ]
   return torch.stack(b, dim=-1)
 
+def box_xyxy_center(x):
+  x0,y0,x1,y1 = x.unbind(-1)
+  b = [
+       (x0+x1)/2, (y0+y1)/2
+  ]
+  return torch.stack(b, dim=-1)
+
 def box_cxcywh_to_xyxy(x):
   cx,cy,w,h = x.unbind(-1)
   b = [
@@ -55,9 +62,8 @@ def uniform_shape_masks(tensors):
     batch[i, :tensor.shape[0], :tensor.shape[1], :tensor.shape[2]] = tensor
   return batch
 
-def get_clones(module, n, exclude=[]):
-  memo = {id(obj):obj for obj in exclude}
-  return [copy.deepcopy(module, memo) for i in range(n)]
+def get_clones(module, n):
+  return [copy.deepcopy(module) for i in range(n)]
 
 def batch_positional_encoding(batch_shape, temperature = 10000):
   bs, l, d = batch_shape

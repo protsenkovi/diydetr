@@ -2,11 +2,14 @@ import torch
 import torchvision
 import torchvision.transforms as T
 import torchvision.transforms.functional as F
+import torch.nn.functional as F_torch
+
 # from torch.nn.functional import interpolate
 from torchvision.ops.misc import interpolate
 import PIL
 from pycocotools import mask as coco_mask
 import random
+from utils.functions import box_xyxy_to_cxcywh
 
 def crop(image, target, region):
   cropped_image = F.crop(image, *region)
@@ -180,7 +183,7 @@ class Normalize(object): # use F.normalize, box_xyxy_cxcywh, torch.tensor
     h, w = image.shape[-2:]
     if "boxes" in target:
       boxes = target["boxes"]
-      boxes = box_xyxy_to_cxcywh(boxes)
+      # boxes = box_xyxy_to_cxcywh(boxes)
       boxes = boxes / torch.tensor([w, h, w, h], dtype=torch.float32)
       target["boxes"] = boxes
     return image, target

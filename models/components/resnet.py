@@ -27,7 +27,7 @@ class ResNet(nn.Module):
     )
 
     if train_backbone: 
-      trainable_layer_ids = [2,3,4]
+      trainable_layer_ids = [] #[2,3,4]
       trainable_layers_names = ['layer{}'.format(i) for i in trainable_layer_ids]
       for name, parameter in backbone.named_parameters():
         if any([l in name for l in trainable_layers_names]):

@@ -6,6 +6,7 @@ from models.components.transformer import Transformer
 from models.components.mlp import MLP
 from models.components.segmentation_head import SegmentationHead
 from utils.functions import batch_positional_encoding
+from utils import config 
 
 class DIYDETR(nn.Module):
   def __init__(
@@ -14,6 +15,7 @@ class DIYDETR(nn.Module):
       num_classes,
       num_object_slots=100,
       num_transformer_layers=2,
+      number_of_resnet_layers=18,
       num_heads=2,
       dropout=0.0
   ):
@@ -24,7 +26,10 @@ class DIYDETR(nn.Module):
     self.num_transformer_layers = num_transformer_layers
     self.dropout = dropout
 
-    self.cnnencoder = CNNEncoder(embed_dim=embed_dim)
+    self.cnnencoder = CNNEncoder( 
+      embed_dim=embed_dim,
+      number_of_resnet_layers=number_of_resnet_layers
+    )
     self.transformer = Transformer(
         embed_dim=embed_dim, 
         num_encoder_layers=num_transformer_layers, 
@@ -32,7 +37,7 @@ class DIYDETR(nn.Module):
         num_heads=num_heads,
         dropout=dropout
     )
-    self.segm_head = SegmentationHead(
+    self.segmentation_head = SegmentationHead(
       embed_dim=embed_dim,
       num_object_slots=num_object_slots,
       backbone_intermediate_layers_num_channels=self.cnnencoder.resnet.intemediate_layers_num_channels,
@@ -88,7 +93,7 @@ class DIYDETR(nn.Module):
         memory_positional_encoding = self.positional_encoding
     )
 
-    segmentation_masks = self.segm_head(
+    segmentation_masks = self.segmentation_head(
         answer = answer, 
         memory = memory,
         memory_padding_mask = padding_mask, 
@@ -98,6 +103,18 @@ class DIYDETR(nn.Module):
     class_predictions = self.classification_head(answer)
 
     bbox_predictions = self.bbox_regression_head(answer)
+
+    # config.tb.add_scalar("image_embeddings_nan", image_embeddings.isnan().sum(), config.epoch)
+    # config.tb.add_scalar("image_embeddings_inf", image_embeddings.isinf().sum(), config.epoch)
+
+
+    # config.tb.add_scalar("answer_nan", answer.isnan().sum(), config.epoch)
+    # config.tb.add_scalar("padding_mask_nan", padding_mask.isnan().sum(), config.epoch)
+    # config.tb.add_scalar("memory_nan", memory.isnan().sum(), config.epoch)
+    # config.tb.add_scalar("positional_encoding_nan", self.positional_encoding.isnan().sum(), config.epoch)
+    # config.tb.add_scalar("object_slots_positional_encoding_nan", self.object_slots_positional_encoding.isnan().sum(), config.epoch)
+
+
 
     output = {
         'class_predictions':class_predictions, 

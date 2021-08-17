@@ -24,3 +24,9 @@ class MaskedTensor(object):
 
   def rearrange(self, *args, **kargs):
     return self.__delegate_op(einops.rearrange, *args, **kargs)
+
+  def pin_memory(self):
+    self.data = self.data.pin_memory()
+    if self.mask is not None:
+      self.mask = self.mask.pin_memory()
+    return self
