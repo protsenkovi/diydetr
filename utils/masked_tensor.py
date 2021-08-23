@@ -20,6 +20,8 @@ class MaskedTensor(object):
     data = op(self.data, *args, **kargs)
     if self.mask is not None:
       mask = op(self.mask, *args, **kargs)
+    else:
+      mask = None
     return MaskedTensor(data, mask)
 
   def rearrange(self, *args, **kargs):

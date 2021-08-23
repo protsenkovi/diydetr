@@ -53,26 +53,9 @@ class EncoderLayer(nn.Module):
     )
     x = self.norm1(x + self.drop1(residual))
 
-    # print(idx, id(self.norm1))
-    # print(avg_head_attention_matrix.shape)
-    # print(avg_head_attention_matrix)
-    # config.tb.add_images(self._get_name() + str(idx) + "inputs", 
-    #   x.unsqueeze(1), config.epoch)
-
-    # config.tb.add_scalar(self._get_name() + str(idx) + "residual_nan", residual.isnan().sum(), config.epoch)
-    # config.tb.add_scalar(self._get_name() + str(idx) + "residual_inf", residual.isinf().sum(), config.epoch)
-    # config.tb.add_scalar(self._get_name() + str(idx) + "x_nan", x.isnan().sum(), config.epoch)
-    # config.tb.add_scalar(self._get_name() + str(idx) + "x_inf", x.isinf().sum(), config.epoch)
-
     residual = self.feedforward(x)
     x = self.norm2(x + self.drop2(residual))
-
-    # config.tb.add_scalar(self._get_name() + str(idx) + "residual_nan", residual.isnan().sum(), config.epoch)
-    # config.tb.add_scalar(self._get_name() + str(idx) + "residual_inf", residual.isinf().sum(), config.epoch)
-    # config.tb.add_scalar(self._get_name() + str(idx) + "x_nan", x.isnan().sum(), config.epoch)
-    # config.tb.add_scalar(self._get_name() + str(idx) + "x_inf", x.isinf().sum(), config.epoch)
-
-    
+   
     return x
 
 class DecoderLayer(nn.Module):
@@ -146,8 +129,6 @@ class Sequential(nn.Sequential):
   def forward(self, input, **kwargs):
     for idx, module in enumerate(self):
       input = module(input, idx=idx, **kwargs)
-      # config.tb.add_scalar(module._get_name() + str(idx) + "_nan", input.isnan().sum(), config.epoch)
-      # config.tb.add_scalar(module._get_name() + str(idx) + "_inf", input.isinf().sum(), config.epoch)
     return input
 
 class Transformer(nn.Module):
@@ -162,7 +143,7 @@ class Transformer(nn.Module):
     num_decoder_layers=3,
     num_object_slots=100,
     feedforward_expansion_coefficient=4,
-    dropout=0.1, #?
+    dropout=0.1, 
     activation=nn.ReLU()
   ):
     super(Transformer, self).__init__()

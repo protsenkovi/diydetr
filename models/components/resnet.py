@@ -27,10 +27,11 @@ class ResNet(nn.Module):
     )
 
     if train_backbone: 
-      trainable_layer_ids = [] #[2,3,4]
+      trainable_layer_ids = [2,3,4]
       trainable_layers_names = ['layer{}'.format(i) for i in trainable_layer_ids]
       for name, parameter in backbone.named_parameters():
-        if any([l in name for l in trainable_layers_names]):
+        if any([l in name for l in trainable_layers_names]): 
+          # TODO Improve naming. Simplify condition. Should be layer_name in trainable_layer_names
           parameter.requires_grad_(True)
         else:
           parameter.requires_grad_(False)
@@ -41,7 +42,7 @@ class ResNet(nn.Module):
     if return_intermediate_layers:
       return_layer_ids = [1,2,3,4] 
     else:
-      return_layers_ids = [4]
+      return_layer_ids = [4]
 
     self.return_layers = {'layer{}'.format(name):i for i,name in enumerate(return_layer_ids)}
 
@@ -57,9 +58,13 @@ class ResNet(nn.Module):
 
     output = {}
     for name, (_, x) in zip(self.return_layers, xs.items()):
+      if batch.mask is not None:
+        mask = F.interpolate(batch.mask.float(), size=x.shape[2:]).bool()
+      else:
+        mask = None
       output[name] = MaskedTensor(
           x, 
-          F.interpolate(batch.mask.float(), size=x.shape[2:]).bool() 
+          mask 
       )
     
     return output

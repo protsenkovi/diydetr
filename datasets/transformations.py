@@ -10,6 +10,7 @@ import PIL
 from pycocotools import mask as coco_mask
 import random
 from utils.functions import box_xyxy_to_cxcywh
+from utils import config
 
 def crop(image, target, region):
   cropped_image = F.crop(image, *region)
@@ -186,6 +187,8 @@ class Normalize(object): # use F.normalize, box_xyxy_cxcywh, torch.tensor
       # boxes = box_xyxy_to_cxcywh(boxes)
       boxes = boxes / torch.tensor([w, h, w, h], dtype=torch.float32)
       target["boxes"] = boxes
+    if "labels" in target:
+      target["ids"] = torch.tensor([config.class_labels_to_ids[label.item()] for label in target["labels"]])
     return image, target
 
 class Compose(object):

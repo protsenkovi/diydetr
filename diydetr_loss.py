@@ -10,30 +10,26 @@ def diydetr_loss(predicted, targets):
   """ Matcher uses pairwise distance. Loss uses element-wise distance. 
       Predicted format is cx cy w h, targets format is x y x y.
   """
-  # config.tb.add_scalar("class_predictions_nan", predicted['class_predictions'].isnan().sum(), config.epoch)
-  # config.tb.add_scalar("bbox_predictions_nan", predicted['bbox_predictions'].isnan().sum(), config.epoch)
-  # config.tb.add_scalar("segmentation_masks_nan", predicted['segmentation_masks'].isnan().sum(), config.epoch)
-
   predicted['bbox_predictions'] = box_cxcywh_to_xyxy(predicted['bbox_predictions'])
 
   bs, num_queries, num_classes = predicted['class_predictions'].shape
   device = predicted['class_predictions'].device
-  label2tensor = torch.eye(num_classes, device=device) # move 
+   # move 
 
   matchings = matcher(predicted=predicted, targets=targets)
   
   # class loss 
-  # eof is 111110?
-  target_class_labels = [t['labels'] for t in targets]
+  target_class_ids = [t['ids'] for t in targets]
   target_class_distributions = torch.zeros_like(predicted['class_predictions'], device=device)
   target_class_distributions[:,:,-1] = 1.0
 
   for image_idx, matching in enumerate(matchings):
     if matching is not None:
       i, j = matching
-      target_class_distributions[image_idx,i,:] = label2tensor[target_class_labels[image_idx][j]]
+      target_class_distributions[image_idx,i,:] = config.label2tensor[target_class_ids[image_idx][j]].to(device)
 
   class_loss = binary_cross_entropy(predicted['class_predictions'], target_class_distributions).mean()
+
 
   # bbox loss
   target_bboxes_sparse = [t['boxes'] for t in targets]
@@ -64,8 +60,8 @@ def diydetr_loss(predicted, targets):
     segmentation_loss += binary_cross_entropy(predicted_image_masks, target_image_masks).mean()
   segmentation_loss /= bs
 
-  config.tb.add_scalar("class.loss", class_loss, config.epoch)
-  config.tb.add_scalar("bbox.loss", bbox_loss, config.epoch)
-  config.tb.add_scalar("segmentation.loss", segmentation_loss, config.epoch)
+  config.tb.add_scalar("loss/class", class_loss, config.epoch)
+  config.tb.add_scalar("loss/bbox", bbox_loss, config.epoch)
+  config.tb.add_scalar("loss/segmentation", segmentation_loss, config.epoch)
 
   return class_loss + bbox_loss + segmentation_loss

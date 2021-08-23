@@ -39,13 +39,19 @@ def uniform_shape_masked_tensor(tensors):
     to one tensor.
     Returns object of type MaskedTensor that contain data and mask 
     with extra prefix dimension. """
-  max_shape, _ = torch.tensor([tensor.shape for tensor in tensors]).max(dim=0)
-  c, h, w = max_shape
-  batch = torch.zeros(size=(len(tensors), c, h, w))
-  mask = torch.full(fill_value=True, size=(len(tensors), 1, h, w))
-  for i, tensor in enumerate(tensors):
-    batch[i, :tensor.shape[0], :tensor.shape[1], :tensor.shape[2]] = tensor
-    mask[i, :tensor.shape[0], :tensor.shape[1], :tensor.shape[2]] = False
+  bs = len(tensors)
+  assert bs > 0
+  if bs > 1:
+    max_shape, _ = torch.tensor([tensor.shape for tensor in tensors]).max(dim=0)
+    c, h, w = max_shape
+    batch = torch.zeros(size=(len(tensors), c, h, w))
+    mask = torch.full(fill_value=True, size=(bs, 1, h, w)) if bs > 1 else None
+    for i, tensor in enumerate(tensors):
+      batch[i, :tensor.shape[0], :tensor.shape[1], :tensor.shape[2]] = tensor
+      mask[i, :tensor.shape[0], :tensor.shape[1], :tensor.shape[2]] = False
+  else:
+    batch = tensors[0].unsqueeze(0)
+    mask = None
   return MaskedTensor(batch, mask)
 
 def uniform_shape_masks(tensors):

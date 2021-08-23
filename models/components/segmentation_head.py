@@ -37,7 +37,7 @@ class SegmentationHead(nn.Module):
 
     self.initial_conv = nn.Sequential(
         nn.Conv2d(embed_dim, embed_dim, kernel_size=3, padding=1),
-        nn.GroupNorm(2, embed_dim),
+        nn.GroupNorm(num_heads, embed_dim), # use the same number of groups as the number of heads
         nn.ReLU()
     )
 
@@ -59,7 +59,7 @@ class SegmentationHead(nn.Module):
 
     self.last_feature_pyramid_conv = nn.Sequential(
       nn.Conv2d(ds[-2], ds[-1], kernel_size=3, padding=1),
-      nn.GroupNorm(1, ds[-1]),
+      nn.GroupNorm(num_heads, ds[-1]), # use the same number of groups as the number of heads
       nn.ReLU()
     )
 
@@ -94,11 +94,13 @@ class SegmentationHead(nn.Module):
     x = F.interpolate(x, size=(fpn.shape[-2]*4, fpn.shape[-1]*4), mode="nearest")
     x = einops.rearrange(x, "(b masks_count) c h w -> b masks_count c h w", masks_count=self.num_object_slots)
 
-    x_mask = F.interpolate(backbone_intermediate_layers_outputs['layer{}'.format(3-i)].mask.float(),
-                           size=(fpn.shape[-2]*4, fpn.shape[-1]*4), mode="nearest").bool()
-    x_mask = einops.repeat(x_mask, "b c h w -> b masks_count c h w", masks_count=self.num_object_slots)
-
-    x = x.masked_fill(x_mask, 0.0)
+    x_mask = backbone_intermediate_layers_outputs['layer{}'.format(3-i)].mask
+    if x_mask is not None:
+      x_mask = F.interpolate(x_mask.float(),
+                             size=(fpn.shape[-2]*4, fpn.shape[-1]*4), mode="nearest").bool()
+      x_mask = einops.repeat(x_mask, "b c h w -> b masks_count c h w", masks_count=self.num_object_slots)
+      x = x.masked_fill(x_mask, 0.0)
+      
     x = x.squeeze(2)
 
     return x

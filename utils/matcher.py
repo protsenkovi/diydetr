@@ -12,16 +12,16 @@ def matcher(predicted, targets):
   matchings = []
   for image_class_predicted_probability_distributions, \
       image_bbox_predictions, \
-      image_class_target_labels, \
+      image_class_target_ids, \
       image_bbox_targets in \
     zip(
       predicted['class_predictions'].to(device), 
       predicted['bbox_predictions'].to(device),
-      [v['labels'].to(device) for v in targets],
+      [v['ids'].to(device) for v in targets],
       [v['boxes'].to(device) for v in targets]
     ):
-      if image_class_target_labels.shape[0] > 0:
-        cost_class = -image_class_predicted_probability_distributions[:, image_class_target_labels]
+      if image_class_target_ids.shape[0] > 0:
+        cost_class = -image_class_predicted_probability_distributions[:, image_class_target_ids]
         cost_bbox = pairwise_strange_loss(image_bbox_predictions, image_bbox_targets)
 
         cost_class = cost_class.cpu().detach()

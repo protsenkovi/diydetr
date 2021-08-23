@@ -17,14 +17,17 @@ class DIYDETR(nn.Module):
       num_transformer_layers=2,
       number_of_resnet_layers=18,
       num_heads=2,
-      dropout=0.0
+      dropout=0.0,
+      device=torch.device("cpu")
   ):
     super().__init__() 
+    # assert embed_dim//num_heads >= 16
     self.num_classes = num_classes
     self.num_object_slots = num_object_slots
     self.embed_dim = embed_dim
     self.num_transformer_layers = num_transformer_layers
     self.dropout = dropout
+    self.device = device
 
     self.cnnencoder = CNNEncoder( 
       embed_dim=embed_dim,
@@ -49,13 +52,15 @@ class DIYDETR(nn.Module):
       nn.Sigmoid()
     )
     self.classification_head = nn.Sequential(
-      nn.Linear(embed_dim, num_classes+1), 
-      nn.Softmax()
+      nn.Linear(embed_dim, num_classes), 
+      nn.Softmax(dim=-1)
     )
 
     self.positional_encoding = None
     self.object_slots_embedding = None 
     self.object_slots_positional_encoding = None
+
+    self.to(self.device)
 
   def __device(self):
     return next(self.parameters()).device
@@ -81,7 +86,7 @@ class DIYDETR(nn.Module):
     cnn_output, interm_outputs = self.cnnencoder(images)
     
     image_embeddings = cnn_output.data
-    padding_mask = cnn_output.mask.squeeze(-1)
+    padding_mask = cnn_output.mask.squeeze(-1) if cnn_output.mask is not None else None
     
     self.__init_query__(image_embeddings.shape)
 
@@ -103,18 +108,6 @@ class DIYDETR(nn.Module):
     class_predictions = self.classification_head(answer)
 
     bbox_predictions = self.bbox_regression_head(answer)
-
-    # config.tb.add_scalar("image_embeddings_nan", image_embeddings.isnan().sum(), config.epoch)
-    # config.tb.add_scalar("image_embeddings_inf", image_embeddings.isinf().sum(), config.epoch)
-
-
-    # config.tb.add_scalar("answer_nan", answer.isnan().sum(), config.epoch)
-    # config.tb.add_scalar("padding_mask_nan", padding_mask.isnan().sum(), config.epoch)
-    # config.tb.add_scalar("memory_nan", memory.isnan().sum(), config.epoch)
-    # config.tb.add_scalar("positional_encoding_nan", self.positional_encoding.isnan().sum(), config.epoch)
-    # config.tb.add_scalar("object_slots_positional_encoding_nan", self.object_slots_positional_encoding.isnan().sum(), config.epoch)
-
-
 
     output = {
         'class_predictions':class_predictions, 
