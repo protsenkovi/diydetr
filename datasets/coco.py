@@ -1,6 +1,7 @@
 import torchvision
 from datasets.transformations import ConvertCocoPolysToMask, Compose, ToTensor, Normalize, RandomHorizontalFlip, \
 RandomSelect, RandomResize, RandomSizeCrop
+import torchvision.transforms.functional as F
 
 class CocoDetection(torchvision.datasets.CocoDetection):
   def __init__(
@@ -44,7 +45,7 @@ def train_coco_transforms():
     normalize,
   ])
 
-def val_coco_transforms(image_set):
+def val_coco_transforms():
   normalize = Compose([
     ToTensor(),
     Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
@@ -57,3 +58,15 @@ def val_coco_transforms(image_set):
     normalize
   ])
 
+class Preprocess(object): # use F.normalize, box_xyxy_cxcywh, torch.tensor
+  def __init__(self, mean, std):
+    self.mean = mean
+    self.std = std
+  
+  def __call__(self, image):
+    image = F.to_tensor(image)
+    image = F.normalize(image, mean=self.mean, std=self.std)
+    return image
+
+def inference_coco_transforms():
+  return Preprocess(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])

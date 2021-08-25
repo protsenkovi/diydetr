@@ -87,6 +87,7 @@ class DIYDETR(nn.Module):
     
     image_embeddings = cnn_output.data
     padding_mask = cnn_output.mask.squeeze(-1) if cnn_output.mask is not None else None
+
     
     self.__init_query__(image_embeddings.shape)
 
@@ -110,7 +111,8 @@ class DIYDETR(nn.Module):
     bbox_predictions = self.bbox_regression_head(answer)
 
     output = {
-        'class_predictions':class_predictions, 
-        'bbox_predictions':bbox_predictions, 
-        'segmentation_masks':segmentation_masks}
+      'class_predictions':class_predictions, 
+      'bbox_predictions':bbox_predictions, 
+      'segmentation_masks':segmentation_masks
+    }
     return output

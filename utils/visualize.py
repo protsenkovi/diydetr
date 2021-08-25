@@ -81,5 +81,5 @@ def draw_box(ax, box, linewidth=1, edgecolor='b', facecolor='none', text=None, l
   rect = patches.Rectangle(anchor_point, w, h, linewidth=linewidth, edgecolor=edgecolor, facecolor=facecolor, label=label, **kwargs)
   ax.add_patch(rect)
   if text is not None:
-    ax.text(cx, cy, text, color=edgecolor, bbox=dict(boxstyle="square", fc=(0., 0., 0., 0.4), ec=(1., 1., 1., 0.0)))
+    ax.text(cx, cy, text, color=edgecolor, bbox=dict(boxstyle="square", fc=(0., 0., 0., 0.6), ec=(1., 1., 1., 0.0)))
   ax.scatter(cx, cy, c=edgecolor, s=linewidth)

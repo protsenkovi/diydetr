@@ -14,7 +14,6 @@ def diydetr_loss(predicted, targets):
 
   bs, num_queries, num_classes = predicted['class_predictions'].shape
   device = predicted['class_predictions'].device
-   # move 
 
   matchings = matcher(predicted=predicted, targets=targets)
   

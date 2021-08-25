@@ -5,3 +5,6 @@ runs/
 __pycache__
 .torch/
 .vscode/
+*.pt
+*.pt.backup
+*.mp4
