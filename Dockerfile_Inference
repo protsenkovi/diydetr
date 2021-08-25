@@ -144,9 +144,7 @@ RUN rm -f /opt/*.bz2
 RUN rm -f /opt/*.gz
 RUN rm -f /opt/*.zip
 
-ENV PYTHONPATH=/usr/local/lib/python2.7/site-packages:$PYTHONPATH
+ENV PYTHONPATH=/usr/local/lib/python2.7/site-packages:$PYTHONPATH # ? WHY
 
 USER ${UID}:${GID}
 ENTRYPOINT [""]
-
-#-DPYTHON3_LIBRARIES=/opt/conda/lib/python3.7/site-packages/ \

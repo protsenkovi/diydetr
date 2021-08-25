@@ -7,4 +7,5 @@ docker build \
   --build-arg UID=$UID \
   --build-arg GID=$GID \
   --build-arg PW=123 \
-  -t diydetr .
+  -t diydetr \
+  -f Dockerfile_Training .
