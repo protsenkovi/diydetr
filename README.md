@@ -40,4 +40,4 @@ https://raw.githubusercontent.com/protsenkovi/diydetr/master/docs/videos/predict
 
 training for several epochs for the fixed batch.
 
-https://raw.githubusercontent.com/protsenkovi/diydetr/master/docs/videos/example_convergence_for_fixed_batch.mp4
+[https://raw.githubusercontent.com/protsenkovi/diydetr/master/docs/videos/example_convergence_for_fixed_batch.mp4](https://user-images.githubusercontent.com/431393/169621836-fd76bf23-6050-4404-80c4-55663c32216b.mp4)
