@@ -1,3 +1,4 @@
+import os
 import torch
 from models.diydetr import DIYDETR
 from datasets.coco import CocoDetection, train_coco_transforms
@@ -29,7 +30,7 @@ print("Training on", img_folder, ann_file )
 
 epochs = int(1e8)
 device = torch.device('cuda')
-batch_size = 1
+batch_size = 2
 
 
 dataset = CocoDetection(
@@ -58,18 +59,21 @@ data_loader = DataLoader(
 )
 dataset_iterator = iter(data_loader)
 
-
-# model = DIYDETR( 
-#   embed_dim=128, 
-#   num_classes=config.num_classes, 
-#   num_object_slots=3, 
-#   dropout=0.1,
-#   number_of_resnet_layers=18,
-#   num_heads=8,
-#   device=device,
-#   num_transformer_layers=6
-# )
-model = torch.load("current_model.pt")
+if os.path.isfile('current_model.pt'):
+  model = torch.load('current_model.pt')
+  print("Continue")
+else:
+  model = DIYDETR( 
+   embed_dim=256, 
+   num_classes=config.num_classes, 
+   num_object_slots=3, 
+   dropout=0.1,
+   number_of_resnet_layers=50,
+   num_heads=8,
+   device=device,
+   num_transformer_layers=6
+ )
+ print("New model")
 print()
 print(model)
 print()
