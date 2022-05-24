@@ -12,6 +12,10 @@ Work in progress.
 
 # Misc
 
+## Features of the code
+- einops heavy,
+- masked tensor (inspired by [masked array](https://numpy.org/doc/stable/reference/maskedarray.html)) simplifies function signatures and decreases probability of making a mistake in image/mask rearrangement
+
 ## Losses comparison
 
 intersection decrease, union increase, distance between centers increse for losses:
