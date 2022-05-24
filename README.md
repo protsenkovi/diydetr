@@ -40,6 +40,6 @@ https://user-images.githubusercontent.com/431393/169622005-27d07ab5-b357-47d7-a3
 
 ## visualisation of training process run for several epochs with fixed batch 
 
-sign that the of code is starting to work.
+sign that the code is starting to work.
 
 [https://raw.githubusercontent.com/protsenkovi/diydetr/master/docs/videos/example_convergence_for_fixed_batch.mp4](https://user-images.githubusercontent.com/431393/169621836-fd76bf23-6050-4404-80c4-55663c32216b.mp4)
